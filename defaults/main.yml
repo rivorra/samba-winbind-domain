@@ -1,0 +1,29 @@
+---
+# defaults file for samba-winbind-domain
+samba_pkg_el7:
+  - krb5-workstation
+  - samba-winbind-krb5-locator
+  - samba-winbind-clients
+  - samba-winbind
+  - samba-common-tools
+  - pam
+  - expect
+pam_files:
+  - fingerprint-auth
+  - fingerprint-auth-ac
+  - password-auth
+  - password-auth-ac
+  - smartcard-auth
+  - smartcard-auth-ac
+  - system-auth
+  - system-auth-ac
+admin_domain_user: "Adminisrator"
+workgroup: "CONTOSO"
+realm: "CONTOSO.LOCAL"
+dc_servers:
+  - { name: "dc1.contoso.local", primary: true }
+  - { name: "dc2.contoso.local", primary: false }
+domain_pass: "{{ vault_domain }}"
+domain_pass_escaped: "{{ vault_domai_escaped }}"
+samba_shares:
+  - { name: media, comment: "media folder", browseable: yes, writeable: yes, guest_ok: no, force_user: root, force_group: root, valid_users: "@DommainGroup", path: "/media"}

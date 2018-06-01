@@ -1,0 +1,5 @@
+## Put your secrets here and encrypt it with ansible-vault
+## ansible-vault encrypt vault.yml
+## http://docs.ansible.com/ansible/latest/vault.html
+vault_domain: "SecretToEncrypt$"
+vault_domain_escaped: "SecretToEncrypt\$"

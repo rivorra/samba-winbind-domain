@@ -1,0 +1,18 @@
+# {{ ansible_managed}}
+include=/etc/samba/common-dc.conf
+interfaces = lo {{ansible_default_ipv4.alias}}
+
+#============================ Share Definitions ==============================
+{% for share in samba_shares %}
+
+[{{ share.name }}]
+comment = {{ share.comment }}
+browseable = {{ share.browseable }}
+writeable = {{ share.writeable }}
+guest ok = {{ share.guest_ok }}
+force user = {{ share.force_user }}
+force group = {{ share.force_group }}
+valid users = {{ share.valid_users }}
+path = {{ share.path }}
+
+{% endfor %}

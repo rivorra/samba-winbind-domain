@@ -1,0 +1,22 @@
+galaxy_info:
+  author: Raúl Ivorra Oltra
+  description: Configures a server member in Windows domain with winbind
+  company:
+
+
+  license: license (GPLv3)
+
+  min_ansible_version: 2.2
+  platforms:
+  - name: EL
+    versions:
+      - 7
+      # TODO - 6
+
+  galaxy_tags:
+    - samba
+    - domain
+    - winbind
+    - ad
+
+dependencies:

@@ -1,0 +1,44 @@
+# {{ ansible_managed}}
+[logging]
+ default = FILE:/var/log/krb5libs.log
+ kdc = FILE:/var/log/krb5kdc.log
+ admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ default_realm = {{ realm }}
+ dns_lookup_realm = true
+ dns_lookup_kdc = true
+ ticket_lifetime = 24h
+ forwardable = yes
+
+[realms]
+ {{ realm }} = {
+{%for dc in dc_servers%}
+  kdc = {{ dc.name }}:88
+{%endfor%}
+{%for dc in dc_servers if dc.primary == true %}
+  admin_server = {{ dc.name }}:749
+{%endfor%}
+
+  default_domain = {{ realm }}
+{%for dc in dc_servers if dc.primary == true %}
+kpasswd_server = {{ dc.name }}:464
+{%endfor%}
+  kpasswd_protocol = SET_CHANGE
+ }
+
+[domain_realm]
+ .{{ realm|lower }} = {{ realm|upper}}
+ {{ realm|lower }} = {{ realm|upper}}
+
+[kdc]
+profile = /var/kerberos/krb5kdc/kdc.conf
+
+[appdefaults]
+ pam = {
+   debug = false
+   ticket_lifetime = 36000
+   renew_lifetime = 36000
+   forwardable = true
+   krb4_convert = false
+ }

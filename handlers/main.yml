@@ -1,0 +1,10 @@
+---
+# handlers file for samba-winbind-domain
+- name: restart Samba related services
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - winbind
+    - nmb
+    - smb

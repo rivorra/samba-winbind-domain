@@ -1,0 +1,127 @@
+---
+# samba-domain.yml
+
+- name: Install Samba software
+  yum:
+    state: present
+    name: "{{ item }}"
+  with_items:
+    - "{{ samba_pkg_el7 }}"
+  when: ansible_os_family == "RedHat" and ansible_distribution_version|int == 7
+
+- name: PAM config files pam_winbind.so
+  lineinfile:
+    path: "/etc/pam.d/{{ item }}"
+    state: present
+    line: "session     optional      pam_winbind.so"
+  with_items:
+    - "{{ pam_files }}"
+  notify: restart Samba related services
+
+- name: account pam_winbind.so
+  lineinfile:
+    path: "/etc/pam.d/{{ item }}"
+    state: present
+    line: "account     [default=bad success=ok user_unknown=ignore] pam_winbind.so"
+    regexp: '^account.*pam_winbind\.so.*'
+  with_items:
+    - "{{ pam_files }}"
+  notify: restart Samba related services
+
+- name: password    sufficient    pam_winbind.so use_authtok
+  lineinfile:
+    path: "/etc/pam.d/{{ item }}"
+    state: present
+    line: "password    sufficient    pam_winbind.so use_authtok"
+    regexp: '^password.*sufficient.*pam_winbind\.so.*'
+  with_items:
+   - "password-auth"
+   - "password-auth-ac"
+   - "system-auth"
+   - "system-auth-ac"
+  notify: restart Samba related services
+
+- name: /etc/samba/common-dc.conf
+  template:
+    src: common-dc.conf.j2
+    dest: /etc/samba/common-dc.conf
+    owner: root
+  notify: restart Samba related services
+
+- name: /etc/samba/smb.conf
+  template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+    owner: root
+  notify: restart Samba related services
+
+- name: /etc/krb5.conf
+  tenplate:
+    src: krb5.conf.j2
+    dest: /etc/krb5.conf
+  notify: restart Samba related services
+
+- name: /etc/nsswitch.conf
+  copy:
+    src: nsswitch.conf
+    dest: /etc/nsswitch.conf
+  notify: restart Samba related services
+
+- name: test samba config
+  shell: |
+    set timeout 300
+    spawn testparm
+    expect "Press enter to see a dump of your service definitions"
+    send "\r"
+    expect eof
+  args:
+    executable: /usr/bin/expect
+  changed_when: no
+
+- name: "Test is joined to {{ domain }}"
+  shell: wbinfo -t
+  changed_when: no
+  register: wbinfo_test
+  failed_when: "wbinfo_test.rc == 3"
+
+- name: Set fact for join domain
+  set_fact:
+    join_domain: true
+  when: wbinfo_test.stdout_lines[0] !="checking the trust secret for domain {{ workgroup }} via RPC calls succeeded"
+
+- name: "join {{ domain }}"
+  shell: |
+    set timeout 300
+    spawn net ads join -U {{ admin_domain_user }}
+    expect "Enter {{ admin_domain_user }}'s password:"
+    send "{{ domain_pass_escaped }}\r"
+    expect eof
+  args:
+    executable: /usr/bin/expect
+  when: join_domain is defined and join_domain == true
+  notify: restart Samba related services
+
+- name: restart Samba services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  when: join_domain is defined and join_domain == true
+  with_items:
+    - winbind
+    - smb
+    - nmb
+
+- name: "Test is joined to {{ domain }}"
+  shell: wbinfo -t
+  changed_when: no
+  when: join_domain is defined and join_domain == true
+
+- name: Test Samba related services
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - winbind
+    - smb
+    - nmb

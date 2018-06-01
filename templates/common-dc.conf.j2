@@ -1,0 +1,51 @@
+# {{ ansible_managed}}
+[global]
+
+        workgroup = {{ workgroup }}
+        realm = {{ realm }}
+        security = ads
+        template shell = /bin/false
+        server string = %L
+        allow trusted domains = yes
+        client use spnego = yes
+        domain master = no
+        server signing = auto
+        client signing = auto
+        client ipc signing = auto
+        ldap ssl = start tls
+        create mask = 0664
+        directory mask = 0755
+        load printers = no
+        disable spoolss = yes
+        printcap name = /dev/null
+        guest account = nobody
+#idmap
+        idmap config * : backend = tdb
+        idmap config * : range = 1000-1999
+        idmap config {{ workgroup }} : range = 2000-2999
+        # TODO loop over trusted domains
+
+
+#winbind
+        winbind enum users = yes
+        winbind enum groups = yes
+        winbind use default domain = yes
+        winbind offline logon = yes
+
+        invalid users = root bin daemon lp sys tty
+
+# Network Config
+        bind interfaces only = true
+        socket options = TCP_NODELAY
+
+# --------------------------- Logging Options -----------------------------
+
+        #log level = 5
+        max log size = 1024
+
+# ----------------------- Browser Control Options ----------------------------
+        local master = no
+        preferred master = no
+        wins support = no
+        dns proxy = no
+        wins proxy = no

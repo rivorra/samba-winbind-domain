@@ -1,0 +1,3 @@
+---
+- import_tasks: samba-domain.yml
+  when: domain is defined
