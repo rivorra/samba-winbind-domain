@@ -1,5 +1,6 @@
 ## Put your secrets here and encrypt it with ansible-vault
 ## ansible-vault encrypt vault.yml
 ## http://docs.ansible.com/ansible/latest/vault.html
-vault_domain: "SecretToEncrypt$"
-vault_domain_escaped: "SecretToEncrypt\$"
+vault_domain: "SecretToEncrypt"
+# vault_domain_escaped: to escape special characters like $ witj slash \
+vault_domain_escaped: "SecretToEncryptEscaped" 
