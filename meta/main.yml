@@ -19,4 +19,4 @@ galaxy_info:
     - winbind
     - ad
 
-dependencies:
+dependencies: []
