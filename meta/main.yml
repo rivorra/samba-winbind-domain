@@ -1,8 +1,8 @@
 galaxy_info:
+  name: samba-winbind-domain
   author: Raúl Ivorra Oltra
   description: Configures a server member in Windows domain with winbind
-  company:
-
+  company: GTT
 
   license: license (GPLv3)
 
